@@ -1,8 +1,11 @@
 from flask import Flask, request, jsonify
 from collections import defaultdict
 import uuid
+from flask_cors import CORS
+import generate
 
 app = Flask(__name__)
+CORS(app, resources={r"/*": {"origins": "http://localhost:3000"}})
 
 user_tokens = defaultdict(list)
 
@@ -25,6 +28,16 @@ def get_balance():
 
     return jsonify({'balance': len(user_tokens[address])})
 
+@app.route('/generate', methods=['POST'])
+def generate_image():
+    prompt = request.json.get('prompt')
+
+    try:
+        generated_image_url = generate.main()
+        return jsonify({'imageUrl': generated_image_url})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+    
 @app.route('/api/keys/consume', methods=['POST'])
 def consume_key():
     address = request.get_json().get('address')

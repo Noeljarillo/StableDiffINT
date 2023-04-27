@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 
 
 // Replace 'http://localhost:5000' with the base URL of your API server
-const api_base_url = 'http://localhost:5000';
+const api_base_url = 'http://localhost:5000/api/';
 
 const TokenKeyManager = ({ account }) => {
   const [remainingPrompts, setRemainingPrompts] = useState(0);
@@ -31,7 +31,7 @@ const TokenKeyManager = ({ account }) => {
         return;
       }
 
-      const response = await fetch(`${api_base_url}/keys/purchase`, {
+      const response = await fetch(`${api_base_url}keys/purchase`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -48,7 +48,7 @@ const TokenKeyManager = ({ account }) => {
 
   const consumeTokenKey = async () => {
     try {
-      const response = await fetch(`${api_base_url}/keys/consume`, {
+      const response = await fetch(`${api_base_url}keys/consume`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
