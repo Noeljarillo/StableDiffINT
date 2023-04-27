@@ -1,16 +1,16 @@
+// src/pages/Home.js
 import React, { useState } from 'react';
 import Web3 from 'web3';
 import PromptInput from '../components/PromptInput';
 import SubmitButton from '../components/SubmitButton';
 import GeneratedImage from '../components/GeneratedImage';
-import { buyPrompts } from '../components/smartcontract'; // Import the function to interact with your smart contract
+import TokenKeyManager from '../components/TokenKeyManager';
 
 const Home = () => {
   const [web3, setWeb3] = useState(null);
   const [account, setAccount] = useState(null);
   const [generatedImageUrl, setGeneratedImageUrl] = useState('');
   const [prompt, setPrompt] = useState('');
-  const [remainingPrompts, setRemainingPrompts] = useState(0);
 
   const connectWallet = async () => {
     if (window.ethereum) {
@@ -43,7 +43,7 @@ const Home = () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ prompt, address }), // Include the address in the request body
+        body: JSON.stringify({ prompt, address }),
       });
 
       const data = await response.json();
@@ -54,20 +54,6 @@ const Home = () => {
       } else {
         console.error('Error generating image:', data.error);
       }
-    } catch (error) {
-      console.error('Error:', error);
-    }
-  };
-
-  const purchasePrompts = async () => {
-    try {
-      if (!account) {
-        alert('Please connect your wallet first.');
-        return;
-      }
-
-      await buyPrompts(account);
-      setRemainingPrompts(remainingPrompts + 10);
     } catch (error) {
       console.error('Error:', error);
     }
@@ -86,13 +72,7 @@ const Home = () => {
         <PromptInput onChange={(e) => setPrompt(e.target.value)} />
         <SubmitButton onSubmit={() => submitPrompt(prompt)} />
         <GeneratedImage src={generatedImageUrl} />
-        <p className="mt-4">Remaining prompts: {remainingPrompts}</p>
-        <button
-          onClick={purchasePrompts}
-          className="bg-green-500 text-white px-4 py-2 rounded-md mt-4"
-        >
-          Buy 10 more prompts
-        </button>
+        <TokenKeyManager account={account} />
       </div>
     </div>
   );
