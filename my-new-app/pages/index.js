@@ -1,10 +1,45 @@
-// src/pages/Home.js
 import React, { useState } from 'react';
 import Web3 from 'web3';
 import PromptInput from '../components/PromptInput';
 import SubmitButton from '../components/SubmitButton';
 import GeneratedImage from '../components/GeneratedImage';
 import TokenKeyManager from '../components/TokenKeyManager';
+
+const contractABI = [
+	{
+		"inputs": [],
+		"name": "buyPrompts",
+		"outputs": [],
+		"stateMutability": "payable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"stateMutability": "nonpayable",
+		"type": "constructor"
+	},
+	{
+		"inputs": [],
+		"name": "withdraw",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "owner",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	}
+] // Replace with your contract's ABI
+const contractAddress = '0xed9c73a71ea7ade3470f4ce943aebef81dc0392b'; // Replace with your contract's address
 
 const Home = () => {
   const [web3, setWeb3] = useState(null);
@@ -24,6 +59,36 @@ const Home = () => {
       }
     } else {
       alert('Please install MetaMask or another Web3-enabled wallet.');
+    }
+  };
+
+  const callContractFunction = async () => {
+    if (!web3 || !account) {
+      alert('Please connect your wallet first.');
+      return;
+    }
+
+    const contract = new web3.eth.Contract(contractABI, contractAddress);
+
+    try {
+      const gasPrice = await web3.eth.getGasPrice();
+      const gasEstimate = await contract.methods.buyPrompts().estimateGas({ from: account, value: web3.utils.toWei('0.001', 'ether') });
+
+      const transaction = await contract.methods.buyPrompts().send({
+        from: account,
+        value: web3.utils.toWei('0.001', 'ether'),
+        gasPrice: gasPrice,
+        gas: gasEstimate,
+      });
+
+      if (transaction.status) {
+        alert('Transaction successful! You can now use your purchased prompts.');
+      } else {
+        alert('Transaction failed. Please try again.');
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      alert('Error occurred while sending the transaction.');
     }
   };
 
@@ -68,9 +133,16 @@ const Home = () => {
           className="bg-blue-500 text-white px-4 py-2 rounded-md mb-4"
         >
           Connect Wallet
-        </button>
+       
+          </button>
         <PromptInput onChange={(e) => setPrompt(e.target.value)} />
         <SubmitButton onSubmit={() => submitPrompt(prompt)} />
+        <button
+          onClick={callContractFunction}
+          className="bg-green-500 text-white px-4 py-2 rounded-md mb-4"
+        >
+          Purchase Prompts
+        </button>
         <GeneratedImage src={generatedImageUrl} />
         <TokenKeyManager account={account} />
       </div>
